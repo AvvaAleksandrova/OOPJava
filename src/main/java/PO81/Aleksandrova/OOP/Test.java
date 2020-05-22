@@ -1,10 +1,8 @@
 package PO81.Aleksandrova.OOP;
 
 import PO81.Aleksandrova.OOP.model.OwnersFloor;
-import PO81.Aleksandrova.OOP.model.Parking;
 import PO81.Aleksandrova.OOP.model.Person;
 import PO81.Aleksandrova.OOP.model.Vehicle;
-import PO81.Aleksandrova.OOP.model.Space;
 
 public class Test {
     public static void lab1tests() {

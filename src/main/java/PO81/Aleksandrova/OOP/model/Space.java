@@ -1,31 +1,11 @@
 package PO81.Aleksandrova.OOP.model;
 
-public class Space {
-    private Person person;
-    private Vehicle vehicle;
+public interface Space {
+    Person getPerson();
 
-    public Space(Person person, Vehicle vehicle) {
-        this.person = person;
-        this.vehicle = vehicle;
-    }
+    void setPerson(Person person);
 
-    public Space(){
-        this(Person.UNDEFINED, new Vehicle());
-    }
+    Vehicle getVehicle();
 
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    public Vehicle getVehicle() {
-        return vehicle;
-    }
-
-    public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
+    void setVehicle(Vehicle vehicle);
 }

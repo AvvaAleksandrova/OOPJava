@@ -1,6 +1,6 @@
 package PO81.Aleksandrova.OOP.model;
 
-public class OwnersFloor {
+public class OwnersFloor implements Floor {
     private Space[] spaces;
     private int countSpaces;
 
@@ -72,7 +72,6 @@ public class OwnersFloor {
     }
 
     public Space deleteSpace(String stateNumber) {
-        Space buf;
         for (int i = 0; i < spaces.length; i++) {
             if (spaces[i].getVehicle().getStateNumber().equals(stateNumber)){
                 return deleteSpace(i);
@@ -81,7 +80,7 @@ public class OwnersFloor {
         return null;
     }
 
-    public int getCountSpaces() {
+    public int getCountSpace() {
         return countSpaces;
     }
 
