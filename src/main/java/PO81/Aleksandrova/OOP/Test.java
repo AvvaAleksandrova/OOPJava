@@ -6,7 +6,7 @@ import PO81.Aleksandrova.OOP.model.Vehicle;
 
 public class Test {
     public static void lab1tests() {
-        Person person = new Person("Gibard", "Morten");
+        /*Person person = new Person("Gibard", "Morten");
         Person person1 = new Person("Ireson", "Clerissa");
         Person person2 = new Person("Gokes", "Mikael");
         Person person3 = new Person("GokesTEST", "MikaelTEST");
@@ -29,11 +29,13 @@ public class Test {
         OwnersFloor ownersFloor = new OwnersFloor(spaces);
 
         Space deleteSpace2 = ownersFloor.deleteSpace(1);
-        Space replace = ownersFloor.replaceSpace(2,space1);
+        Space replace = ownersFloor.replaceSpace(2,space1);*/
 
     }
 
-    ;
+    public static void lab2tests(){
+
+    }
 
     public static void main(String[] args) {
         lab1tests();
