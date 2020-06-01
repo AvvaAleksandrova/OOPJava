@@ -1,6 +1,6 @@
 package PO81.Aleksandrova.OOP.model;
 
-public class RentedSpaceFloor implements Floor, IInstanceHandler {
+public class RentedSpacesFloor implements Floor, IInstanceHandler {
     private Node head;
     private int size;
     private final static int DEFAULT_SIZE = 1;
@@ -203,7 +203,6 @@ public class RentedSpaceFloor implements Floor, IInstanceHandler {
         }
     }
 
-
     @Override
     public void expand() {
         addSpace(new RentedSpace());
@@ -234,7 +233,4 @@ public class RentedSpaceFloor implements Floor, IInstanceHandler {
             System.out.println(space.toString());
         }
     }
-}
-
-
 }
