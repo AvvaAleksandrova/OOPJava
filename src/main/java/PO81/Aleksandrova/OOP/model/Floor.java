@@ -3,23 +3,36 @@ package PO81.Aleksandrova.OOP.model;
 public interface Floor {
     boolean addSpace(Space space);
 
-    boolean addSpace(int number, Space space);
+    void expandArray();
 
-    Space getSpace(int number);
+    boolean addSpace(int index, Space space);
 
-    Space getSpace(String stateNumber);
+    Space getSpace(int index);
 
-    boolean isVehicle(String stateNumber);
+    Space getSpace(String registrationNumber);
 
-    Space replaceSpace(int number, Space newSpace);
+    boolean hasSpace(String registrationNumber);
 
-    Space deleteSpace(int number);
+    Space replaceWith(int index, Space space);
 
-    Space deleteSpace(String stateNumber);
+    Space remove(int index);
 
-    int getCountSpace();
+    Space remove(String registrationNumber);
+
+    int size();
 
     Space[] getSpaces();
 
     Vehicle[] getVehicles();
+
+    boolean checkRegistrationNumber(Space space, String registrationNumber);
+
+    boolean checkVehiclesType(Space space, VehicleTypes types);
+
+    Space[] getSpacesByVehiclesType(VehicleTypes type);
+
+    Space[] getFreeSpaces();
+
+    int getSpacesCountByVehiclesType(VehicleTypes type);
+
 }

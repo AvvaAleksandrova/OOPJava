@@ -6,38 +6,58 @@ import PO81.Aleksandrova.OOP.model.Vehicle;
 
 public class Test {
     public static void lab1tests() {
-        /*Person person = new Person("Gibard", "Morten");
-        Person person1 = new Person("Ireson", "Clerissa");
-        Person person2 = new Person("Gokes", "Mikael");
-        Person person3 = new Person("GokesTEST", "MikaelTEST");
-
-        Vehicle vehicle = new Vehicle("West-Borer", "Duiker, common", "1FT7W2A66EE790570");
-        Vehicle vehicle1 = new Vehicle("Kshlerin, Schaefer and Nienow", "Chipmunk, least", "WAUKH94F26N511206");
-        Vehicle vehicle2 = new Vehicle("Zieme Inc", "Hyena, spotted", "WAULFAFR4BA791523");
-        Vehicle vehicle3 = new Vehicle("Zieme IncTEST", "Hyena, spotted TEST", "WAULFAFR4BA791523 TEST");
-
-        Space space = new Space(person, vehicle);
-        Space space1 = new Space(person1, vehicle1);
-        Space space2 = new Space(person2, vehicle2);
-        Space space3 = new Space(person3, vehicle3);
-
-        Space[] spaces = new Space[3];
-        spaces[0] = space;
-        spaces[1] = space1;
-        spaces[2] = space2;
-
-        OwnersFloor ownersFloor = new OwnersFloor(spaces);
-
-        Space deleteSpace2 = ownersFloor.deleteSpace(1);
-        Space replace = ownersFloor.replaceSpace(2,space1);*/
 
     }
 
     public static void lab2tests(){
 
     }
+   public static void lab3tests(){
+        printFrame();
+        System.out.println("Тестирование изменений в классе Vehicle");
+        printFrame();
+        Vehicle truck = new Vehicle("H7716OM", "Scania", "SL50", VehicleTypes.TRUCK);
+        Vehicle bikeWithoutNumbers = new Vehicle(VehicleTypes.MOTORBIKE);
+        Vehicle voidVehicle = new Vehicle();
+        System.out.println("Типы созданных машин: " + truck.getType().getValue() + ", " +
+                bikeWithoutNumbers.getType().getValue() + ", " + voidVehicle.getType().getValue());
+        printFrame();
+        System.out.println("Тестирование изменений в классах, реализующих интерфейс Space");
+        printFrame();
+        RentedSpace rentedSpace = new RentedSpace(new Person("Alexey", "Smolnikov"));
+        OwnedSpace ownedSpace = new OwnedSpace(truck, new Person("Max", "Ludendorf"));
+        System.out.println("Является ли rentedSpace пустым? " + rentedSpace.isEmpty());
+        System.out.println("Является ли ownedSpace пустым? " + ownedSpace.isEmpty());
+        System.out.println("Вызов метода setVehicle()...");
+        rentedSpace.setVehicle(bikeWithoutNumbers);
+        System.out.println("Является ли rentedSpace пустым? " + rentedSpace.isEmpty() + "\n");
+        printFrame();
+        System.out.println("Тестирование новых методов интерфейса Floor и класса Parking");
+        printFrame();
+        Parking parking = new Parking(createOwnersFloor(), createRentedSpacesFloor());
+        OwnersFloor firstFloor = (OwnersFloor) parking.getFloor(0);
+        RentedSpacesFloor secondFloor = (RentedSpacesFloor) parking.getFloor(1);
+        System.out.println("Cписок кроссоверов на первом этаже");
+        printFrame();
+        firstFloor.printSpacesByVehiclesType(VehicleTypes.CROSSOVER);
+        printFrame();
+        System.out.println("Cписок автомобилей на втором этаже");
+        printFrame();
+        secondFloor.printSpacesByVehiclesType(VehicleTypes.CAR);
+        printFrame();
+        firstFloor.addSpace(new RentedSpace());
+        firstFloor.addSpace(new RentedSpace());
+        System.out.println("Кол-во пустых мест на первом этаже: " + firstFloor.getFreeSpaces().length);
+        printFrame();
+        secondFloor.addSpace(new RentedSpace());
+        System.out.println("Oбщее число незанятых парковочных мест: " + parking.getFreeSpacesCount());
+        printFrame();
+        System.out.println("Общее число автомобилей: " + parking.getSpacesCountByVehiclesType(VehicleTypes.CAR));
+        printFrame();
+
+    }
 
     public static void main(String[] args) {
-        lab1tests();
+        lab3tests();
     }
 }

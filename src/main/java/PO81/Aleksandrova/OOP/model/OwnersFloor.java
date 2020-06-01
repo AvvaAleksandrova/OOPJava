@@ -1,108 +1,196 @@
 package PO81.Aleksandrova.OOP.model;
 
-public class OwnersFloor implements Floor {
+public class OwnersFloor implements Floor, IInstanceHandler {
+    private static final int DEFAULT_CAPACITY = 16;
+    private static final int INITIAL_SIZE = 0;
     private Space[] spaces;
-    private int countSpaces;
+    private int size;
+
 
     public OwnersFloor() {
-        this(16);
+        this.spaces = new Space[DEFAULT_CAPACITY];
+        this.size = INITIAL_SIZE;
     }
 
-    public OwnersFloor(int spacesCount) {
-        this.spaces = new Space[spacesCount];
-        countSpaces = 0;
+
+    public OwnersFloor(int size) {
+        this.spaces = new Space[size];
+        this.size = INITIAL_SIZE;
     }
+
 
     public OwnersFloor(Space[] spaces) {
-        this.spaces = spaces;
-        countSpaces = spaces.length;
+        this.spaces = new Space[spaces.length];
+        System.arraycopy(spaces, 0, this.spaces, 0, spaces.length);
+        this.size = countNotNull(this.spaces);
     }
 
-    public boolean addSpace(Space space) {
-        resize();
-        spaces[countSpaces] = space;
-        countSpaces++;
-        return true;
-    }
 
-    public boolean addSpace(int number, Space space) {
-        resize();
-        Space[] buf = spaces;
-        System.arraycopy(buf, 0, spaces, 0, number);
-        System.arraycopy(buf, number, spaces, number + 1, countSpaces - number);
-        spaces[number] = space;
-        countSpaces++;
-        return true;
-    }
-
-    public Space getSpace(int number) {
-        return spaces[number];
-    }
-
-    public Space getSpace(String stateNumber) {
-        for (int i = 0; i < spaces.length; i++) {
-            if (spaces[i].getVehicle().getStateNumber().equals(stateNumber)) {
-                return spaces[i];
+    private int countNotNull(Space[] spaces) {
+        int count = 0;
+        for (Space space : spaces) {
+            if (space != null) {
+                count++;
             }
         }
-        return null;
+        return count;
     }
 
-    public boolean isVehicle(String stateNumber) {
+
+
+    public boolean addSpace(Space space) {
+        if (this.size == this.spaces.length) {
+            expandArray();
+        }
         for (int i = 0; i < spaces.length; i++) {
-            if (spaces[i].getVehicle().getStateNumber().equals(stateNumber)) {
+            if (spaces[i] == null) {
+                spaces[i] = space;
+                size++;
                 return true;
             }
         }
         return false;
     }
 
-    public Space replaceSpace(int number, Space newSpace) {
-        Space buf = spaces[number];
-        spaces[number] = newSpace;
-        return buf;
+
+    public void expandArray() {
+        Space[] newArray = new Space[this.spaces.length * 2];
+        System.arraycopy(this.spaces, 0, newArray, 0, this.size);
+        this.spaces = newArray;
     }
 
-    public Space deleteSpace(int number) {
-        Space buf = spaces[number];
-        System.arraycopy(spaces, number + 1, spaces, number, countSpaces - number -1);
-        spaces[countSpaces - 1] = null;
-        countSpaces--;
-        return buf;
+
+    public boolean addSpace(int index, Space space) {
+        if (this.size == this.spaces.length) {
+            expandArray();
+        }
+        shift(index, false);
+        this.spaces[index] = space;
+        this.size++;
+
+
+        return true;
     }
 
-    public Space deleteSpace(String stateNumber) {
-        for (int i = 0; i < spaces.length; i++) {
-            if (spaces[i].getVehicle().getStateNumber().equals(stateNumber)){
-                return deleteSpace(i);
+    public void shift(int index, boolean isLeft) {
+        expandArray();
+        if (spaces.length >= index) {
+            if (isLeft) {
+                System.arraycopy(spaces, index + 1, spaces, index, spaces.length - index - 1);
+                spaces[spaces.length - 1] = null;
+            } else {
+                System.arraycopy(spaces, index, spaces, index + 1, spaces.length - index - 1);
+                spaces[index] = null;
             }
         }
+    }
+
+    public void expand() {
+    }
+
+    public Space getSpace(int index) {
+        return this.spaces[index];
+    }
+
+    public Space getSpace(String registrationNumber) {
+        for (Space rentedSpace : spaces) {
+            if (checkRegistrationNumber(rentedSpace, registrationNumber)) {
+                return rentedSpace;
+            }
+        }
+        return new RentedSpace();
+    }
+
+    public boolean checkRegistrationNumber(Space rentedSpace, String registrationNumber) {
+        return rentedSpace.getVehicle().getRegistrationNumber().equals(registrationNumber);
+    }
+
+    public boolean hasSpace(String registrationNumber) {
+        for (Space rentedSpace : spaces) {
+            if (checkRegistrationNumber(rentedSpace, registrationNumber)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Space replaceWith(int index, Space space) {
         return null;
     }
 
-    public int getCountSpace() {
-        return countSpaces;
+    public Space replaceWith(Space space, int index) {
+        Space replacedRentedSpace = this.spaces[index];
+        this.spaces[index] = space;
+        return replacedRentedSpace;
+    }
+
+    public Space remove(int index) {
+        Space removedRentedSpace = this.spaces[index];
+        shift(index, false);
+        this.size--;
+        return removedRentedSpace;
+    }
+
+    public Space remove(String registrationNumber) {
+        for (int i = 0; i < getSpaces().length; i++) {
+            if (checkRegistrationNumber(spaces[i], registrationNumber)) {
+                return remove(i);
+            }
+        }
+        return new RentedSpace();
+    }
+
+    public int size() {
+        return size;
     }
 
     public Space[] getSpaces() {
-        Space[] buf = new Space[countSpaces];
-        System.arraycopy(spaces, 0, buf, 0, countSpaces);
-        return buf;
+        Space[] notNullSpaces = new Space[size];
+        System.arraycopy(spaces, 0, notNullSpaces, 0, size);
+        return notNullSpaces;
     }
 
     public Vehicle[] getVehicles() {
-        Vehicle[] vehicles = new Vehicle[countSpaces];
-        for (int i = 0; i < countSpaces; i++) {
-            vehicles[i] = spaces[i].getVehicle();
+        Vehicle[] notNullVehicles = new Vehicle[size];
+        for (int i = 0; i < size; i++) {
+            notNullVehicles[i] = spaces[i].getVehicle();
         }
-        return vehicles;
+        return notNullVehicles;
     }
 
-    private void resize() {
-        if (countSpaces == spaces.length) {
-            Space[] buf = spaces;
-            spaces = new Space[buf.length * 2];
-            System.arraycopy(buf, 0, spaces, 0, countSpaces);
+    public boolean checkVehiclesType(Space space, VehicleTypes type) {
+        return space.getVehicle().getType().equals(type);
+    }
+
+    public Space[] getSpacesByVehiclesType(VehicleTypes type) {
+        return Arrays.stream(getSpaces())
+                .filter(space -> checkVehiclesType(space, type))
+                .toArray(Space[]::new);
+    }
+
+    public Space[] getFreeSpaces() {
+        return getSpacesByVehiclesType(VehicleTypes.NONE);
+    }
+
+    public int getSpacesCountByVehiclesType(VehicleTypes type) {
+        return getSpacesByVehiclesType(type).length;
+    }
+
+    public void printSpaces() {
+        for (Space space : getSpaces()) {
+            System.out.println(space.toString());
+        }
+    }
+
+    public void printVehicles() {
+        for (Vehicle vehicle : getVehicles()) {
+            System.out.println(vehicle.toString());
+        }
+    }
+
+    public void printSpacesByVehiclesType(VehicleTypes type) {
+        for (Space space : getSpacesByVehiclesType(type)) {
+            System.out.println(space.toString());
         }
     }
 }

@@ -1,21 +1,38 @@
 package PO81.Aleksandrova.OOP.model;
 
-public class Person {
-    private String name;
-    private String surname;
-    static final Person UNDEFINED = new Person("", "");
+public final class Person {
+    public static final Person UNKNOWN_PERSON = new Person("", "");
+    private String firstName;
+    private String secondName;
 
-    public Person(String name, String surname) {
-        this.name = name;
-        this.surname = surname;
-    }
 
-    public String getName() {
-        return name;
+    public Person(String firstName, String secondName) {
+        this.firstName = firstName;
+        this.secondName = secondName;
     }
 
 
-    public String getSurname() {
-        return surname;
+    public static void getUnknownPerson() {
+    }
+
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+
+    @Override
+    public String toString() {
+        return "\nPerson info: " + "first name - " + firstName + ", second name - " + secondName;
     }
 }
+
+
+
+
+
