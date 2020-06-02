@@ -2,55 +2,146 @@ package PO81.Aleksandrova.OOP.model;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public interface Floor {
+
+public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Space> {
+
     boolean add(Space space);
 
     void expandArray();
 
-    boolean add(int index, Space space) throws IndexOutOfBoundsException;;
+    boolean add(int index, Space space) throws IndexOutOfBoundsException;
 
-    Space get(int index) throws IndexOutOfBoundsException;;
+    Space get(int index) throws IndexOutOfBoundsException;
 
-    Space get(String registrationNumber)throws NoRentedSpaceException;;
+    default Space get(String registrationNumber) throws NoRentedSpaceException {
+        Objects.requireNonNull(registrationNumber, "Параметр registrationNumber не должен быть null");
+        for (Space space : getSpaces()) {
+            if (isRegistrationNumberEqual(space, registrationNumber)) {
+                return space;
+            }
+        }
+        throw new NoRentedSpaceException();
+    }
 
-    boolean hasSpace(String registrationNumber);
+    default boolean hasSpace(String registrationNumber) {
+        return Arrays.stream(getSpaces())
+                .anyMatch(space -> isRegistrationNumberEqual(space, registrationNumber));
+    }
 
-    boolean hasSpace(Person person);
+    default boolean hasSpace(Person person) {
+        return Arrays.stream(getSpaces()).anyMatch(space -> space.getPerson().equals(person));
+    }
 
     Space replaceWith(int index, Space space) throws IndexOutOfBoundsException;
 
-    Space remove(int index) throws IndexOutOfBoundsException;
+    default Space remove(int index) throws IndexOutOfBoundsException {
+        Space removedSpace = get(index);
+        shift(index, true);
+        return removedSpace;
+    }
 
-    boolean remove(Space space) ;
+    default Space remove(String registrationNumber) throws NoSuchElementException {
+        for (int i = 0; i < size(); i++) {
+            if (isRegistrationNumberEqual(get(i), Vehicle.checkNumber(registrationNumber))) {
+                return remove(i);
+            }
+        }
+        throw new NoSuchElementException();
+    }
 
-    int indexOf(Space space);
+    default boolean remove(Space space) {
+        remove(indexOf(space));
+        return true;
+    }
 
-    int getSpacesCountWithPerson(Person person);
+    default int indexOf(Space space) {
+        Objects.requireNonNull(space, "Параметр space не должен быть null");
+        for (int i = 0; i < size(); i++) {
+            if (get(i).equals(space)) {
+                return i;
+            }
+        }
+        throw new IndexOutOfBoundsException();
+    }
 
-    Space remove(String registrationNumber) throws NoSuchElementException;
+    default int getSpacesCountWithPerson(Person person) {
+        Objects.requireNonNull(person, "Параметр person не должен быть null");
+        AtomicInteger counter = new AtomicInteger(0);
+        iterator().forEachRemaining(space -> {
+            if (space.getPerson().equals(person)) {
+                counter.incrementAndGet();
+            }
+        });
+        return counter.get();
+    }
 
-    int size();
+    default int size() {
+        return getSpaces().length;
+    }
 
     Space[] getSpaces();
 
-    Vehicle[] getVehicles();
+    default Vehicle[] getVehicles() {
+        return Arrays.stream(getSpaces())
+                .map(Space::getVehicle)
+                .filter(Objects::nonNull)
+                .toArray(Vehicle[]::new);
+    }
 
-    int getVehiclesCount();
+    default int getVehiclesCount() {
+        return getVehicles().length;
+    }
 
-    boolean isRegistrationNumberEqual(Space space, String registrationNumber);
+    default boolean isRegistrationNumberEqual(Space space, String registrationNumber) {
+        return space.getVehicle().getRegistrationNumber().equals(registrationNumber);
+    }
 
-    boolean isVehiclesTypeEqual(Space space, VehicleTypes types);
+    default boolean isVehiclesTypeEqual(Space space, VehicleTypes type) {
+        return space.getVehicle().getType().equals(type);
+    }
 
-    Space[] getSpacesByVehiclesType(VehicleTypes type);
+    default Space[] getSpacesByVehiclesType(VehicleTypes type) {
+        return Arrays.stream(getSpaces())
+                .filter(space -> isVehiclesTypeEqual(space, Objects.requireNonNull(type, "Параметр type не должен быть null")))
+                .toArray(Space[]::new);
+    }
 
-    Space[] getFreeSpaces();
+    default Space[] getFreeSpaces() {
+        return getSpacesByVehiclesType(VehicleTypes.NONE);
+    }
 
-    int getSpacesCountByVehiclesType(VehicleTypes type);
+    default RentedSpace[] getRentedSpaces() throws NoRentedSpaceException {
+        RentedSpace[] rentedSpaces = Arrays.stream(getSpaces())
+                .filter(space -> space instanceof RentedSpace)
+                .toArray(RentedSpace[]::new);
+        if (rentedSpaces.length == 0) {
+            throw new NoRentedSpaceException();
+        }
+        return rentedSpaces;
+    }
 
-    LocalDate getNearestEndsDate() throws NoRentedSpaceException;
+    default int getSpacesCountByVehiclesType(VehicleTypes type) {
+        return getSpacesByVehiclesType(Objects.requireNonNull(type, "Параметр type не должен быть null")).length;
+    }
 
-    Space getSpaceWithNearestEndsDate() throws NoRentedSpaceException;
+    default LocalDate getNearestEndsDate() throws NoRentedSpaceException {
+        return ((RentedSpace) getSpaceWithNearestEndsDate()).getRentEndsDate();
+    }
+
+    default Space getSpaceWithNearestEndsDate() throws NoRentedSpaceException {
+        return Objects.requireNonNull(Arrays.stream(getRentedSpaces()).min(RentedSpace::compareTo).get());
+    }
+
+    default void printSpacesByVehiclesType(VehicleTypes type) {
+        for (Space space : getSpacesByVehiclesType(type)) {
+            System.out.println(space.toString());
+        }
+    }
 
     String toString();
 
@@ -60,4 +151,13 @@ public interface Floor {
 
     public Object clone() throws CloneNotSupportedException;
 
+    @Override
+    default int compareTo(Floor floor) {
+        return size() - floor.size();
+    }
+
+    @Override
+    default Iterator<Space> iterator() {
+        return new SpaceIterator(getSpaces());
+    }
 }

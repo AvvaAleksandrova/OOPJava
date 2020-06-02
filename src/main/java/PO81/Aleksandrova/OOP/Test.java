@@ -22,7 +22,8 @@ public class Test {
                 //lab2tests();
                 //lab3tests();
                 //lab4tests();
-                lab5tests();
+                //lab5tests();
+                lab6tests();
         }
 
 
@@ -296,6 +297,26 @@ public class Test {
         private static String getPeriodValue(Period period) {
                 return String.format("%d years %d months %d days", period.getYears(), period.getMonths(), period.getDays());
         }
+        private static void lab6tests() {
+                printFrame();
+                System.out.println("Лабораторная №6");
+                printFrame();
+                System.out.println("Тестирование компаратора");
+                printFrame();
+                OwnersFloor firstFloor = createOwnersFloor();
+                RentedSpacesFloor secondFloor = createRentedSpacesFloor();
+                secondFloor.add(new RentedSpace());
+                OwnersFloor voidFloor = new OwnersFloor();
+                Parking parking = new Parking(firstFloor, secondFloor, voidFloor);
+                System.out.print("Размеры этажей, отсортированных по возрастанию: ");
+                for (Floor floor : parking.getSortedFloors()) {
+                        System.out.print(floor.size() + " ");
+                }
+                System.out.println();
+                printFrame();
+                System.out.println("[!] Итератор используется в методах, которые уже протестированы в других лабораторных [!]");
+        }
+
 
 
 }

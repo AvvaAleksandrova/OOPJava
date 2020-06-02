@@ -4,14 +4,15 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Objects;
 
-public class RentedSpace extends AbstractSpace {
+public class RentedSpace extends AbstractSpace implements Comparable<RentedSpace> {
+
     private final static LocalDate DEFAULT_SINCE_DATE = LocalDate.now().minusDays(1);
 
     private final static LocalDate DEFAULT_ENDS_DATE = LocalDate.now().plusDays(1);
 
     private LocalDate rentEndsDate;
 
-    public RentedSpace(Person person) {
+    public RentedSpace() {
         this(Vehicle.getNoVehicle(), Person.getUnknownPerson(), DEFAULT_SINCE_DATE, DEFAULT_ENDS_DATE);
     }
 
@@ -56,7 +57,8 @@ public class RentedSpace extends AbstractSpace {
         return super.clone();
     }
 
+    @Override
+    public int compareTo(RentedSpace rentedSpace) {
+        return rentEndsDate.compareTo(rentedSpace.rentEndsDate);
+    }
 }
-
-
-
