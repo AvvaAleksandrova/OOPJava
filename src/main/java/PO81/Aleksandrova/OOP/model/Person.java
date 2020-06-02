@@ -9,19 +9,29 @@ public final class Person implements Cloneable {
 
 
     public Person(String firstName, String secondName) {
-        this.firstName = firstName;
-        this.secondName = secondName;
+        this.firstName = Objects.requireNonNull(firstName, "Значение firstName не должно быть null");
+        this.secondName = Objects.requireNonNull(secondName, "Значение secondName не должно быть null");
     }
 
-    public static void getUnknownPerson() {
+    public static Person getUnknownPerson() {
+        return UNKNOWN_PERSON;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
+    public void setFirstName(String firstName) {
+        this.firstName = Objects.requireNonNull(firstName, "Значение firstName не должно быть null");
+        ;
+    }
+
     public String getSecondName() {
         return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = Objects.requireNonNull(secondName, "Значение secondName не должно быть null");
     }
 
     @Override

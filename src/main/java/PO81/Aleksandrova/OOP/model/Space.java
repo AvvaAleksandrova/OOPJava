@@ -1,4 +1,6 @@
 package PO81.Aleksandrova.OOP.model;
+import java.time.LocalDate;
+import java.time.Period;
 
 public interface Space {
     Vehicle getVehicle();
@@ -10,6 +12,12 @@ public interface Space {
     void setPerson(Person person);
 
     boolean isEmpty();
+
+    LocalDate getSinceDate();
+
+    void setSinceDate(LocalDate sinceDate);
+
+    Period getPeriod();
 
     String toString();
 

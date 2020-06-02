@@ -1,31 +1,34 @@
 package PO81.Aleksandrova.OOP.model;
 
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
+
 public interface Floor {
     boolean add(Space space);
 
     void expandArray();
 
-    boolean add(int index, Space space);
+    boolean add(int index, Space space) throws IndexOutOfBoundsException;;
 
-    Space get(int index);
+    Space get(int index) throws IndexOutOfBoundsException;;
 
-    Space getS(String registrationNumber);
+    Space get(String registrationNumber)throws NoRentedSpaceException;;
 
     boolean hasSpace(String registrationNumber);
 
     boolean hasSpace(Person person);
 
-    Space replaceWith(int index, Space space);
+    Space replaceWith(int index, Space space) throws IndexOutOfBoundsException;
 
-    Space remove(int index);
+    Space remove(int index) throws IndexOutOfBoundsException;
 
-    boolean remove(Space space);
+    boolean remove(Space space) ;
 
     int indexOf(Space space);
 
     int getSpacesCountWithPerson(Person person);
 
-    Space remove(String registrationNumber);
+    Space remove(String registrationNumber) throws NoSuchElementException;
 
     int size();
 
@@ -35,9 +38,9 @@ public interface Floor {
 
     int getVehiclesCount();
 
-    boolean checkRegistrationNumber(Space space, String registrationNumber);
+    boolean isRegistrationNumberEqual(Space space, String registrationNumber);
 
-    boolean checkVehiclesType(Space space, VehicleTypes types);
+    boolean isVehiclesTypeEqual(Space space, VehicleTypes types);
 
     Space[] getSpacesByVehiclesType(VehicleTypes type);
 
@@ -45,10 +48,16 @@ public interface Floor {
 
     int getSpacesCountByVehiclesType(VehicleTypes type);
 
+    LocalDate getNearestEndsDate() throws NoRentedSpaceException;
+
+    Space getSpaceWithNearestEndsDate() throws NoRentedSpaceException;
+
     String toString();
 
     int hashCode();
 
     boolean equals(Object obj);
+
+    public Object clone() throws CloneNotSupportedException;
 
 }

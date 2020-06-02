@@ -1,4 +1,5 @@
 package PO81.Aleksandrova.OOP.model;
+import java.time.LocalDate;
 
 public class OwnedSpace extends AbstractSpace  {
 
@@ -6,12 +7,16 @@ public class OwnedSpace extends AbstractSpace  {
         super();
     }
 
-    public OwnedSpace(Person person) {
-        super(person);
-    }
-
     public OwnedSpace(Vehicle vehicle, Person person) {
         super(vehicle, person);
+    }
+
+    public OwnedSpace(Person person, LocalDate sinceDate) {
+        super(person, sinceDate);
+    }
+
+    public OwnedSpace(Vehicle vehicle, Person person, LocalDate sinceDate) {
+        super(vehicle, person, sinceDate);
     }
 
     @Override

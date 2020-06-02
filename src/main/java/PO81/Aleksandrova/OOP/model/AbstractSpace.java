@@ -1,27 +1,41 @@
 package PO81.Aleksandrova.OOP.model;
 
 import java.util.Objects;
+import java.time.Period;
+import java.time.LocalDate;
 
 public abstract class AbstractSpace implements Space  {
     private Vehicle vehicle;
     private Person person;
+    private LocalDate sinceDate;
 
 
    protected AbstractSpace() {
-        this(Vehicle.getNoVehicle());
+       this(Vehicle.getNoVehicle(), Person.getUnknownPerson(), LocalDate.now());
     }
 
-    protected AbstractSpace(Person person) {
-        this(Vehicle.getNoVehicle(), person);
+    protected AbstractSpace(Person person, LocalDate sinceDate)  {
+        this(Vehicle.getNoVehicle(), person, sinceDate);
     }
 
     protected AbstractSpace(Vehicle vehicle, Person person) {
-        this.vehicle = vehicle;
-        this.person = person;
+        this(vehicle, person, LocalDate.now());
     }
 
-    public AbstractSpace(Vehicle noVehicle) {
+    protected AbstractSpace(Vehicle vehicle, Person person, LocalDate sinceDate) {
+        this.vehicle = Objects.requireNonNull(vehicle, "Значение vehicle не должно быть null");
+        this.person = Objects.requireNonNull(person, "Значение person не должно быть null");
+        checkDates(sinceDate, LocalDate.now().plusDays(1));
+    }
 
+    protected LocalDate checkDates(LocalDate sinceDate, LocalDate date) {
+        if (sinceDate.isBefore(date)) {
+            this.sinceDate = Objects.requireNonNull(sinceDate, "Значение sinceDate не должно быть null");
+        } else {
+            throw new IllegalArgumentException("Дата начала владения парковочным " +
+                    "местом не может быть позже текущей даты");
+        }
+        return date;
     }
 
     @Override
@@ -31,7 +45,7 @@ public abstract class AbstractSpace implements Space  {
 
     @Override
     public void setVehicle(Vehicle vehicle) {
-        this.vehicle = vehicle;
+        this.vehicle = Objects.requireNonNull(vehicle, "Значение vehicle не должно быть null");
     }
 
     @Override
@@ -41,7 +55,22 @@ public abstract class AbstractSpace implements Space  {
 
     @Override
     public void setPerson(Person person) {
-        this.person = person;
+        this.person = Objects.requireNonNull(person, "Значение person не должно быть null");
+    }
+
+    @Override
+    public LocalDate getSinceDate() {
+        return sinceDate;
+    }
+
+    @Override
+    public void setSinceDate(LocalDate sinceDate) {
+        this.sinceDate = Objects.requireNonNull(sinceDate, "Значение sinceDate не должно быть null");
+    }
+
+    @Override
+    public Period getPeriod() {
+        return Period.between(sinceDate, LocalDate.now());
     }
 
     @Override
@@ -51,12 +80,12 @@ public abstract class AbstractSpace implements Space  {
 
     @Override
     public String toString() {
-        return String.format("[Person] %s\n[Vehicle] %s\n", person.toString(), vehicle.toString());
+        return String.format("[Person] %s\n[Vehicle] %s\n", person.toString(), vehicle.toString(), sinceDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(person, vehicle);
+        return Objects.hash(person, vehicle, sinceDate);
     }
 
     @Override
@@ -68,7 +97,7 @@ public abstract class AbstractSpace implements Space  {
             return false;
         }
         AbstractSpace other = (AbstractSpace) obj;
-        return Objects.equals(person, other.person) && Objects.equals(vehicle, other.vehicle);
+        return Objects.equals(person, other.person) && Objects.equals(vehicle, other.vehicle) && Objects.equals(sinceDate, other.sinceDate);
     }
 
     @Override

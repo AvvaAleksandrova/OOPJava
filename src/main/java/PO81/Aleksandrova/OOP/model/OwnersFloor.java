@@ -1,11 +1,12 @@
 package PO81.Aleksandrova.OOP.model;
 import java.util.Arrays;
 import java.util.Objects;
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
 
 public class OwnersFloor implements Floor, IInstanceHandler {
     private static final int DEFAULT_CAPACITY = 16;
     private static final int INITIAL_SIZE = 0;
-    private final static Space DEFAULT_SPACE = new RentedSpace();
     private Space[] spaces;
     private int size;
 
@@ -43,8 +44,8 @@ public class OwnersFloor implements Floor, IInstanceHandler {
         }
         for (int i = 0; i < spaces.length; i++) {
             if (spaces[i] == null) {
-                spaces[i] = space;
-                size++;
+                spaces[i] = Objects.requireNonNull(space, "Параметр space не должен быть null");
+                size = size();
                 return true;
             }
         }
@@ -58,36 +59,6 @@ public class OwnersFloor implements Floor, IInstanceHandler {
         this.spaces = newArray;
     }
 
-/*
-    public boolean addSpace(int index, Space space) {
-        if (this.size == this.spaces.length) {
-            expandArray();
-        }
-        shift(index, false);
-        this.spaces[index] = space;
-        this.size++;
-
-
-        return true;
-    }
-
-    public void expand() {
-    }
-
-    public Space getSpace(int index) {
-        return this.spaces[index];
-    }
-
-    public Space getSpace(String registrationNumber) {
-        for (Space rentedSpace : spaces) {
-            if (checkRegistrationNumber(rentedSpace, registrationNumber)) {
-                return rentedSpace;
-            }
-        }
-        return new RentedSpace();
-    }
-*/
-
     @Override
     public boolean add(int index, Space space) {
         if (this.size == this.spaces.length) {
@@ -97,14 +68,13 @@ public class OwnersFloor implements Floor, IInstanceHandler {
         this.spaces[index] = space;
         this.size++;
 
-
         return true;
     }
 
     @Override
     public void shift(int index, boolean isLeft) {
         expandArray();
-        if (spaces.length >= index) {
+        if (spaces.length >= index && index >= 0) {
             if (isLeft) {
                 System.arraycopy(spaces, index + 1, spaces, index, spaces.length - index - 1);
                 spaces[spaces.length - 1] = null;
@@ -112,40 +82,48 @@ public class OwnersFloor implements Floor, IInstanceHandler {
                 System.arraycopy(spaces, index, spaces, index + 1, spaces.length - index - 1);
                 spaces[index] = null;
             }
+        } else {
+            throw new IndexOutOfBoundsException();
         }
     }
 
     @Override
     public void expand() {
+
+    }
+
+    @Override
+    public Space replaceWith(Space space, int index) {
+        return null;
     }
 
     @Override
     public Space get(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
         return this.spaces[index];
     }
 
     @Override
-    public Space getS(String registrationNumber) {
-        return null;
-    }
-
-    public Space get(String registrationNumber) {
+    public Space get(String registrationNumber) throws NoRentedSpaceException {
+        Objects.requireNonNull(registrationNumber, "Параметр registrationNumber не должен быть null");
         for (Space space : spaces) {
-            if (checkRegistrationNumber(space, registrationNumber)) {
+            if (isRegistrationNumberEqual(space, registrationNumber)) {
                 return space;
             }
         }
-        return new DEFAULT_SPACE;
+        throw new NoRentedSpaceException();
     }
 
     @Override
-    public boolean checkRegistrationNumber(Space space, String registrationNumber) {
+    public boolean isRegistrationNumberEqual(Space space, String registrationNumber) {
         return space.getVehicle().getRegistrationNumber().equals(registrationNumber);
     }
 
     public boolean hasSpace(String registrationNumber) {
         return Arrays.stream(spaces)
-                .anyMatch(space -> checkRegistrationNumber(space, registrationNumber));
+                .anyMatch(space -> isRegistrationNumberEqual(space, registrationNumber));
     }
 
     @Override
@@ -155,13 +133,11 @@ public class OwnersFloor implements Floor, IInstanceHandler {
 
     @Override
     public Space replaceWith(int index, Space space) {
-        return null;
-    }
-
-    @Override
-    public Space replaceWith(Space space, int index) {
-        Space replacedSpace = this.spaces[index];
-        this.spaces[index] = space;
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+        Space replacedSpace = spaces[index];
+        spaces[index] = Objects.requireNonNull(space, "Параметр space не должен быть null");
         return replacedSpace;
     }
 
@@ -169,17 +145,18 @@ public class OwnersFloor implements Floor, IInstanceHandler {
     public Space remove(int index) {
         Space removedSpace = this.spaces[index];
         shift(index, false);
-        this.size--;
+        size = size();
         return removedSpace;
     }
 
+    @Override
     public Space remove(String registrationNumber) {
         for (int i = 0; i < getSpaces().length; i++) {
-            if (checkRegistrationNumber(spaces[i], registrationNumber)) {
+            if (isRegistrationNumberEqual(spaces[i], Vehicle.checkNumber(registrationNumber)))  {
                 return remove(i);
             }
         }
-        return new DEFAULT_SPACE();
+        throw new NoSuchElementException();
     }
 
     @Override
@@ -190,30 +167,31 @@ public class OwnersFloor implements Floor, IInstanceHandler {
 
     @Override
     public int indexOf(Space space) {
-        for(int i = 0; i < size; i++) {
-            if(get(i).equals(space)) {
+        Objects.requireNonNull(space, "Параметр space не должен быть null");
+        for (int i = 0; i < size; i++) {
+            if (get(i).equals(space)) {
                 return i;
             }
         }
-        return 0;
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
     public int getSpacesCountWithPerson(Person person) {
+        Objects.requireNonNull(person, "Параметр person не должен быть null");
         return (int) Arrays.stream(getSpaces())
                 .filter(space -> space.getPerson().equals(person))
                 .count();
     }
 
+    @Override
     public int size() {
-        return size;
+        return getSpaces().length;
     }
 
     @Override
     public Space[] getSpaces() {
-        Space[] notNullSpaces = new Space[size];
-        System.arraycopy(spaces, 0, notNullSpaces, 0, size);
-        return notNullSpaces;
+        return Arrays.stream(spaces).filter(Objects::nonNull).toArray(Space[]::new);
     }
 
     @Override
@@ -229,13 +207,15 @@ public class OwnersFloor implements Floor, IInstanceHandler {
         return getVehicles().length;
     }
 
-    public boolean checkVehiclesType(Space space, VehicleTypes type) {
+    @Override
+    public boolean isVehiclesTypeEqual(Space space, VehicleTypes type) {
         return space.getVehicle().getType().equals(type);
     }
 
+    @Override
     public Space[] getSpacesByVehiclesType(VehicleTypes type) {
         return Arrays.stream(getSpaces())
-                .filter(space -> checkVehiclesType(space, type))
+                .filter(space -> isVehiclesTypeEqual(space, Objects.requireNonNull(type, "Параметр type не должен быть null")))
                 .toArray(Space[]::new);
     }
 
@@ -245,13 +225,21 @@ public class OwnersFloor implements Floor, IInstanceHandler {
     }
 
     public int getSpacesCountByVehiclesType(VehicleTypes type) {
-        return getSpacesByVehiclesType(type).length;
+        return getSpacesByVehiclesType(Objects.requireNonNull(type, "Параметр type не должен быть null")).length;
+    }
+
+    @Override
+    public LocalDate getNearestEndsDate() throws NoRentedSpaceException {
+        throw new NoRentedSpaceException();
+    }
+
+    @Override
+    public Space getSpaceWithNearestEndsDate() throws NoRentedSpaceException {
+        throw new NoRentedSpaceException();
     }
 
     public void printSpaces() {
-        for (Space space : getSpaces()) {
-            System.out.println(space.toString());
-        }
+        System.out.println(toString());
     }
 
     public void printVehicles() {
@@ -295,5 +283,8 @@ public class OwnersFloor implements Floor, IInstanceHandler {
         OwnersFloor other = (OwnersFloor) obj;
         return size == other.size && Objects.deepEquals(spaces, other.spaces);
     }
-
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

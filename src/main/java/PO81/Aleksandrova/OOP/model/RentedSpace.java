@@ -1,17 +1,46 @@
 package PO81.Aleksandrova.OOP.model;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Objects;
+
 public class RentedSpace extends AbstractSpace {
-    public RentedSpace() {
-        super();
-    }
+    private final static LocalDate DEFAULT_SINCE_DATE = LocalDate.now().minusDays(1);
+
+    private final static LocalDate DEFAULT_ENDS_DATE = LocalDate.now().plusDays(1);
+
+    private LocalDate rentEndsDate;
 
     public RentedSpace(Person person) {
-        super(person);
+        this(Vehicle.getNoVehicle(), Person.getUnknownPerson(), DEFAULT_SINCE_DATE, DEFAULT_ENDS_DATE);
     }
 
     public RentedSpace(Vehicle vehicle, Person person) {
-        super(vehicle, person);
+        this(vehicle, person, DEFAULT_SINCE_DATE, DEFAULT_ENDS_DATE);
     }
+
+    public RentedSpace(Person person, LocalDate sinceDate, LocalDate rentEndsDate) {
+        this(Vehicle.getNoVehicle(), person, sinceDate, rentEndsDate);
+    }
+
+    public RentedSpace(Vehicle vehicle, Person person, LocalDate sinceDate, LocalDate rentEndsDate) {
+        super(vehicle, person, sinceDate);
+        this.rentEndsDate = checkDates(sinceDate, rentEndsDate);
+    }
+
+    public LocalDate getRentEndsDate() {
+        return rentEndsDate;
+    }
+
+    public void setRentEndsDate(LocalDate rentEndsDate) {
+        this.rentEndsDate = Objects.requireNonNull(rentEndsDate, "Значение параметра rentEndsDate не должно быть null");
+    }
+
+    @Override
+    public Period getPeriod() {
+        return Period.between(getSinceDate(), rentEndsDate);
+    }
+
     @Override
     public String toString() {
         return String.format("Tenant:\n%s", super.toString());

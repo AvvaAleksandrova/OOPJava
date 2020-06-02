@@ -9,6 +9,11 @@ import PO81.Aleksandrova.OOP.model.RentedSpace;
 import PO81.Aleksandrova.OOP.model.RentedSpacesFloor;
 import PO81.Aleksandrova.OOP.model.Space;
 import PO81.Aleksandrova.OOP.model.VehicleTypes;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.NoSuchElementException;
+import java.util.Random;
+
 
 
 public class Test {
@@ -16,7 +21,8 @@ public class Test {
                 //lab1tests();
                 //lab2tests();
                 //lab3tests();
-                lab4tests();
+                //lab4tests();
+                lab5tests();
         }
 
 
@@ -255,5 +261,41 @@ public class Test {
                 parking.printFloorsWithPerson(person);
                 printFrame();
         }
+        private static void lab5tests() {
+                printFrame();
+                System.out.println("Лабораторная №5");
+                printFrame();
+                OwnersFloor firstFloor = createOwnersFloor();
+                RentedSpacesFloor secondFloor = createRentedSpacesFloor();
+                Parking parking = new Parking(firstFloor, secondFloor);
+                System.out.println("Тестирование исключений");
+                printFrame();
+                try {
+                        Person guessWho = new Person(null, "Mortunkov");
+                        Vehicle vehicleWithIncorrectNumber = new Vehicle("rniebo", "Suzuki", "MAV5", VehicleTypes.MOTORBIKE);
+                        firstFloor.getSpacesByVehiclesType(null);
+                        firstFloor.get(23);
+                        System.out.println("Тестирование новых методов, работающих с LocalDate");
+                        printFrame();
+                        RentedSpace rentedSpace = (RentedSpace) secondFloor.get(1);
+                        System.out.println(rentedSpace.toString());
+                        System.out.println("Период аренды rentedSpace: " + getPeriodValue(rentedSpace.getPeriod()));
+                        System.out.println("Ближайшая дата окончания аренды на этаже: " + secondFloor.getNearestEndsDate());
+                        System.out.println("Парковочное место с ближайшей датой окончания аренды:\n" +
+                                secondFloor.getSpaceWithNearestEndsDate().toString());
+                        printFrame();
+                        System.out.println("Список всех мест на этаже:\n");
+                        secondFloor.printSpaces();
+                } catch (NullPointerException | RegistrationNumberFormatException | IndexOutOfBoundsException |
+                        NoSuchElementException | NoRentedSpaceException e) {
+                        e.printStackTrace();
+                }
+        }
+
+
+        private static String getPeriodValue(Period period) {
+                return String.format("%d years %d months %d days", period.getYears(), period.getMonths(), period.getDays());
+        }
+
 
 }

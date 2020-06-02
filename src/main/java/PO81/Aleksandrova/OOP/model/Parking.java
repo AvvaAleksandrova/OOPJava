@@ -1,8 +1,9 @@
 package PO81.Aleksandrova.OOP.model;
  import java.util.Arrays;
+ import java.util.NoSuchElementException;
+ import java.util.Objects;
 
-
-    public class Parking implements IInstanceHandler {
+public class Parking implements IInstanceHandler {
         private final static int INITIAL_SIZE = 0;
         private Floor[] floors;
         private int size;
@@ -65,7 +66,7 @@ package PO81.Aleksandrova.OOP.model;
             expand();
             for (int i = 0; i < floors.length; i++) {
                 if (floors[i] == null) {
-                    floors[i] = floor;
+                    floors[i] = Objects.requireNonNull(floor, "Параметр floor не должен быть null");
                     this.size++;
                     return true;
                 }
@@ -74,21 +75,33 @@ package PO81.Aleksandrova.OOP.model;
         }
 
         public boolean add(int index, Floor floor) {
+            if(index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException();
+            }
             shift(index, false);
             return add(floor);
         }
 
         public Floor getFloor(int index) {
+            if(index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException();
+            }
             return floors[index];
         }
 
-        public Floor replaceFloor(int index, OwnersFloor floor) {
+        public Floor replaceFloor(int index, Floor floor) {
+            if(index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException();
+            }
             Floor replacedFloor = floors[index];
-            this.floors[index] = floor;
+            this.floors[index] = Objects.requireNonNull(floor, "Параметр floor не должен быть null");
             return replacedFloor;
         }
 
         public Floor removeFloor(int index) {
+            if(index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException();
+            }
             Floor removedFloor = floors[index];
             shift(index, true);
             this.size--;
@@ -96,34 +109,33 @@ package PO81.Aleksandrova.OOP.model;
         }
 
         public Space removeSpace(String registrationNumber) {
-            for (int i = 0; i < getFloors().length; i++) {
-                for (int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                    if (floors[i].checkRegistrationNumber(floors[i].get(j), registrationNumber)) {
-                        return floors[i].remove(j);
-                    }
-                }
+            if(index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException();
             }
-            return new RentedSpace();
+            Floor removedFloor = floors[index];
+            throw new NoSuchElementException();
+
         }
 
         public Space getSpace(String registrationNumber) {
             for (Floor floor : floors) {
                 for (Space space : floor.getSpaces()) {
-                    if (floor.checkRegistrationNumber(space, registrationNumber)) {
+                    if(floor.isRegistrationNumberEqual(space, Vehicle.checkNumber(registrationNumber))) {
                         return space;
                     }
                 }
             }
-            return new RentedSpace();
+            return new RentedSpace(new Person("Alexey", "Smolnikov"));
         }
 
         public Space replaceSpace(Space space, String registrationNumber) {
-            Space replacedSpace = new RentedSpace();
+            Space replacedSpace = new RentedSpace(new Person("Alexey", "Smolnikov"));
             for (int i = 0; i < getFloors().length; i++) {
                 for (int j = 0; j < getFloors()[i].getSpaces().length; j++) {
-                    if (floors[i].checkRegistrationNumber(floors[i].get(j), registrationNumber)) {
+                    if(floors[i].isRegistrationNumberEqual(floors[i].get(j), Vehicle.checkNumber(registrationNumber))) {
                         replacedSpace = floors[i].get(j);
-                        this.floors[i].getSpaces()[j] = space;
+                        floors[i].getSpaces()[j] = Objects.requireNonNull(space,
+                                "Параметр space не должен быть null");
                     }
                 }
             }
@@ -137,12 +149,14 @@ package PO81.Aleksandrova.OOP.model;
         public int getSpacesCountByVehiclesType(VehicleTypes type) {
             int count = 0;
             for (Floor floor : getFloors()) {
-                count += floor.getSpacesCountByVehiclesType(type);
+                count += floor.getSpacesCountByVehiclesType(Objects.requireNonNull(type,
+                        "Параметр type не должен быть null"));
             }
             return count;
         }
 
         public Floor[] getFloorsWithPerson(Person person) {
+            Objects.requireNonNull(person, "Параметр person не должен быть null");
             return Arrays.stream(floors)
                     .filter(floor -> floor.hasSpace(person))
                     .toArray(Floor[]::new);
@@ -150,7 +164,7 @@ package PO81.Aleksandrova.OOP.model;
 
         public void shift(int index, boolean isLeft) {
             expand();
-            if (floors.length >= index) {
+            if (floors.length >= index && index >= 0) {
                 if (isLeft) {
                     System.arraycopy(floors, index + 1, floors, index, floors.length - index - 1);
                     this.floors[floors.length - 1] = null;
@@ -175,6 +189,7 @@ package PO81.Aleksandrova.OOP.model;
         }
 
         public void printFloorsWithPerson(Person person) {
+            Objects.requireNonNull(person, "Параметр person не должен быть null");
             for (Floor floor : getFloorsWithPerson(person)) {
                 System.out.println(floor.toString());
             }
