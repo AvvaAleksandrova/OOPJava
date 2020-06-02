@@ -49,6 +49,10 @@ public final class Vehicle implements Cloneable {
         this.registrationNumber = checkNumber(registrationNumber);
     }
 
+    static String checkNumber(String registrationNumber) {
+        return registrationNumber;
+    }
+
     public String getManufacturer() {
         return manufacturer;
     }
