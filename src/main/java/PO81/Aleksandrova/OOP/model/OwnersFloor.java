@@ -116,7 +116,7 @@ public class OwnersFloor implements Floor, IInstanceHandler {
     }
 
     @Override
-    public Space[] getSpaces() {
+    public Space[] toArray() {
         return Arrays.stream(spaces).filter(Objects::nonNull).toArray(Space[]::new);
     }
 

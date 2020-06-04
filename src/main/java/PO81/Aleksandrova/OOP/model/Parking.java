@@ -1,12 +1,10 @@
 package PO81.Aleksandrova.OOP.model;
 
- import java.util.Arrays;
- import java.util.NoSuchElementException;
- import java.util.Objects;
- import java.util.Iterator;
  import java.util.concurrent.atomic.AtomicInteger;
+ import java.util.stream.Collectors;
+ import java.util.*;
 
-public class Parking implements IInstanceHandler, Iterator<Floor> {
+public class Parking implements IInstanceHandler, Iterable<Floor> {
     private final static int INITIAL_SIZE = 0;
     private Floor[] floors;
     private int size;
@@ -29,17 +27,15 @@ public class Parking implements IInstanceHandler, Iterator<Floor> {
         return Arrays.stream(floors).filter(Objects::nonNull).toArray(Floor[]::new);
     }
 
-    public Floor[] getSortedFloors() {
-        return Arrays.stream(getFloors()).sorted(Floor::compareTo).toArray(Floor[]::new);
+    public List<Floor> getSortedFloors() {
+        return Arrays.stream(getFloors())
+                .sorted(Floor::compareTo)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Vehicle[] getVehicles() {
-        Vehicle[] vehicles = new Vehicle[getSpacesCount()];
-        int counter = 0;
-        for (Floor floor : getFloors()) {
-            System.arraycopy(floor.getVehicles(), 0, vehicles, counter, floor.getVehiclesCount());
-            counter += floor.getVehiclesCount();
-        }
+    public Collection<Vehicle> getVehicles() {
+        Collection<Vehicle> vehicles = new ArrayList<>();
+        iterator().forEachRemaining(floor -> vehicles.addAll(floor.getVehicles()));
         return vehicles;
     }
 
@@ -107,7 +103,7 @@ public class Parking implements IInstanceHandler, Iterator<Floor> {
 
     public Space getSpace(String registrationNumber) throws NoRentedSpaceException {
         for (Floor floor : floors) {
-            for (Space space : floor.getSpaces()) {
+            for (Space space : floor.toArray()) {
                 if (floor.isRegistrationNumberEqual(space, Vehicle.checkNumber(registrationNumber))) {
                     return space;
                 }
@@ -117,8 +113,8 @@ public class Parking implements IInstanceHandler, Iterator<Floor> {
     }
 
     public Space replaceSpace(Space space, String registrationNumber) throws NoRentedSpaceException {
-        for(Floor floor : getFloors()) {
-            if(floor.hasSpace(registrationNumber)) {
+        for (Floor floor : getFloors()) {
+            if (floor.hasSpace(registrationNumber)) {
                 return floor.replaceWith(floor.indexOf(floor.get(registrationNumber)), space);
             }
         }
@@ -136,11 +132,11 @@ public class Parking implements IInstanceHandler, Iterator<Floor> {
         return count.get();
     }
 
-    public Floor[] getFloorsWithPerson(Person person) {
+    public Set<Floor> getFloorsWithPerson(Person person) {
         Objects.requireNonNull(person, "Параметр person не должен быть null");
         return Arrays.stream(floors)
                 .filter(floor -> floor.hasSpace(person))
-                .toArray(Floor[]::new);
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     public void printFloorsWithPerson(Person person) {

@@ -35,7 +35,7 @@ public class RentedSpacesFloor implements Floor, IInstanceHandler {
         }
         node.setNext(new Node(node, head, Objects.requireNonNull(space, "Параметр space не должен быть null")));
         size++;
-        return true;
+        return initialSize < size();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RentedSpacesFloor implements Floor, IInstanceHandler {
     public boolean add(int index, Space space) {
         shift(index, false);
         getNode(index).setValue(Objects.requireNonNull(space, "Параметр space не должен быть null"));
-        return true;
+        return initialSize < size();
     }
 
     @Override
@@ -76,7 +76,7 @@ public class RentedSpacesFloor implements Floor, IInstanceHandler {
     }
 
     @Override
-    public Space[] getSpaces() {
+    public Space[] toArray() {
         Space[] spaces = new Space[size];
         for (int i = 0; i < size; i++) {
             spaces[i] = get(i);
@@ -106,14 +106,12 @@ public class RentedSpacesFloor implements Floor, IInstanceHandler {
         } else {
             Node insertedNode = new Node(null);
             if (index == 0) {
-                insertedNode.setNext(node);
                 insertedNode.setPrevious(insertedNode);
                 head = insertedNode;
                 getNode(size).setNext(head);
                 node.setPrevious(head);
             } else {
                 previousNode.setNext(insertedNode);
-                insertedNode.setNext(node);
                 insertedNode.setPrevious(previousNode);
                 node.setPrevious(insertedNode);
             }
@@ -149,7 +147,7 @@ public class RentedSpacesFloor implements Floor, IInstanceHandler {
             return false;
         }
         RentedSpacesFloor other = (RentedSpacesFloor) obj;
-        return size == other.size && Objects.deepEquals(getSpaces(), other.getSpaces());
+        return size == other.size && Objects.deepEquals(toArray(), other.toArray());
     }
 
     @Override

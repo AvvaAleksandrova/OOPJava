@@ -1,14 +1,11 @@
 package PO81.Aleksandrova.OOP.model;
 
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-
-public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Space> {
+interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Space>, Collection<Space> {
 
     boolean add(Space space);
 
@@ -20,7 +17,7 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
 
     default Space get(String registrationNumber) throws NoRentedSpaceException {
         Objects.requireNonNull(registrationNumber, "Параметр registrationNumber не должен быть null");
-        for (Space space : getSpaces()) {
+        for (Space space : toArray()) {
             if (isRegistrationNumberEqual(space, registrationNumber)) {
                 return space;
             }
@@ -29,12 +26,12 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
     }
 
     default boolean hasSpace(String registrationNumber) {
-        return Arrays.stream(getSpaces())
+        return Arrays.stream(toArray())
                 .anyMatch(space -> isRegistrationNumberEqual(space, registrationNumber));
     }
 
     default boolean hasSpace(Person person) {
-        return Arrays.stream(getSpaces()).anyMatch(space -> space.getPerson().equals(person));
+        return Arrays.stream(toArray()).anyMatch(space -> space.getPerson().equals(person));
     }
 
     Space replaceWith(int index, Space space) throws IndexOutOfBoundsException;
@@ -54,9 +51,11 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
         throw new NoSuchElementException();
     }
 
-    default boolean remove(Space space) {
-        remove(indexOf(space));
-        return true;
+    @Override
+    default boolean remove(Object o) {
+        int initialSize = size();
+        remove(((Space) o).getVehicle().getRegistrationNumber());
+        return initialSize > size();
     }
 
     default int indexOf(Space space) {
@@ -81,20 +80,18 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
     }
 
     default int size() {
-        return getSpaces().length;
+        return toArray().length;
     }
 
-    Space[] getSpaces();
-
-    default Vehicle[] getVehicles() {
-        return Arrays.stream(getSpaces())
+    default Collection<Vehicle> getVehicles() {
+        return Arrays.stream(toArray())
                 .map(Space::getVehicle)
                 .filter(Objects::nonNull)
-                .toArray(Vehicle[]::new);
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     default int getVehiclesCount() {
-        return getVehicles().length;
+        return getVehicles().size();
     }
 
     default boolean isRegistrationNumberEqual(Space space, String registrationNumber) {
@@ -105,18 +102,19 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
         return space.getVehicle().getType().equals(type);
     }
 
-    default Space[] getSpacesByVehiclesType(VehicleTypes type) {
-        return Arrays.stream(getSpaces())
-                .filter(space -> isVehiclesTypeEqual(space, Objects.requireNonNull(type, "Параметр type не должен быть null")))
-                .toArray(Space[]::new);
+    default List<Space> getSpacesByVehiclesType(VehicleTypes type) {
+        return Arrays.stream(toArray())
+                .filter(space -> isVehiclesTypeEqual(space, Objects.requireNonNull(type,
+                        "Параметр type не должен быть null")))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    default Space[] getFreeSpaces() {
-        return getSpacesByVehiclesType(VehicleTypes.NONE);
+    default Deque<Space> getFreeSpaces() {
+        return new LinkedList<>(getSpacesByVehiclesType(VehicleTypes.NONE));
     }
 
     default RentedSpace[] getRentedSpaces() throws NoRentedSpaceException {
-        RentedSpace[] rentedSpaces = Arrays.stream(getSpaces())
+        RentedSpace[] rentedSpaces = Arrays.stream(toArray())
                 .filter(space -> space instanceof RentedSpace)
                 .toArray(RentedSpace[]::new);
         if (rentedSpaces.length == 0) {
@@ -126,7 +124,7 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
     }
 
     default int getSpacesCountByVehiclesType(VehicleTypes type) {
-        return getSpacesByVehiclesType(Objects.requireNonNull(type, "Параметр type не должен быть null")).length;
+        return getSpacesByVehiclesType(Objects.requireNonNull(type, "Параметр type не должен быть null")).size();
     }
 
     default LocalDate getNearestEndsDate() throws NoRentedSpaceException {
@@ -158,6 +156,65 @@ public interface Floor extends IInstanceHandler, Comparable<Floor>, Iterable<Spa
 
     @Override
     default Iterator<Space> iterator() {
-        return new SpaceIterator(getSpaces());
+        return new SpaceIterator(toArray());
+    }
+
+    @Override
+    default boolean isEmpty() {
+        return size() == 0;
+    }
+
+    @Override
+    default boolean contains(Object o) {
+        Space space = (Space) o;
+        return hasSpace(space.getPerson());
+    }
+
+    @Override
+    Space[] toArray();
+
+    @Override
+    default <T> T[] toArray(T[] ts) {
+        Space[] spaces = (Space[]) ts;
+        Arrays.sort(spaces, Comparator.comparing(Space::getSinceDate));
+        return (T[]) spaces;
+    }
+
+    @Override
+    default boolean containsAll(Collection<?> collection) {
+        return collection.stream().allMatch(this::contains);
+    }
+
+    @Override
+    default boolean addAll(Collection<? extends Space> collection) {
+        collection.forEach(this::add);
+        return size() >= collection.size();
+    }
+
+    @Override
+    default boolean removeAll(Collection<?> collection) {
+        int initialSize = size();
+        iterator().forEachRemaining(space -> {
+            if (collection.contains(space)) {
+                remove(space);
+            }
+        });
+        return initialSize > size();
+    }
+
+    @Override
+    default boolean retainAll(Collection<?> collection) {
+        int initialSize = size();
+        iterator().forEachRemaining(space -> {
+            if (!collection.contains(space)) {
+                remove(space);
+            }
+        });
+        return initialSize > size();
+    }
+
+    @Override
+    default void clear() {
+        iterator().forEachRemaining(this::remove);
     }
 }

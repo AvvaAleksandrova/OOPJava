@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.time.Period;
 import java.time.LocalDate;
 
-public abstract class AbstractSpace implements Space  {
+public abstract class AbstractSpace implements Space,Cloneable  {
     private Vehicle vehicle;
     private Person person;
     private LocalDate sinceDate;
